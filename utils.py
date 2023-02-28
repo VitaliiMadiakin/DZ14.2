@@ -53,7 +53,7 @@ def search_by_range_years(first_year, second_year):
         sql_result = cursor.fetchall()
         result = []
         for row in sql_result:
-            result.append({"title": f"{row[0].strip()}", "release_year": f"{row[1].strip()}"})
+            result.append({"title": f"{row[0]}", "release_year": f"{row[1]}"})
         json_result = json.dumps(result)
         return json_result
 
