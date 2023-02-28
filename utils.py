@@ -1,4 +1,4 @@
-gitimport sqlite3
+import sqlite3
 import json
 
 # Структура таблицы
@@ -110,43 +110,37 @@ def step_five(actor_1, actor_2):
     with sqlite3.connect("netflix.db") as connection:
         cursor = connection.cursor()
         sqlite_query = f"""
-                            SELECT *
+                            SELECT "cast", COUNT(*)
                             FROM netflix 
                             WHERE "cast" LIKE '%{actor_1}%'
                             AND "cast" LIKE '%{actor_2}%'
+                            HAVING COUNT(*) >= 2
                             """
         cursor.execute(sqlite_query)
         result = cursor.fetchall()
         return result
 
 
-print(step_five('Rose McIver', 'Ben Lamb'))
+def search_by_type_year_genre(show_type, year, genre):
+    with sqlite3.connect("netflix.db") as connection:
+        cursor = connection.cursor()
+        sqlite_query = f"""
+                            SELECT title, description
+                            FROM netflix
+                            WHERE "type" LIKE '%{show_type}%' 
+                            AND release_year = '{year}' 
+                            AND listed_in LIKE '%{genre}%'
+                            ORDER BY 'release_year' DESC
+                            LIMIT 10
+                            """
+
+        cursor.execute(sqlite_query)
+        sql_result = cursor.fetchall()
+        result = []
+        for row in sql_result:
+            result.append({"title": f"{row[0].strip()}", "description": f"{row[1].strip()}"})
+        json_result = json.dumps(result)
+        return json_result
 
 
-# def search_by_range_listed_in_groups(group):
-#     rating_list = []
-#     if group.lower() == 'children':
-#         rating_list = ["G"]
-#     elif group.lower() == 'family':
-#         rating_list = ["G", "PG", "PG-13"]
-#     elif group.lower() == 'adult':
-#         rating_list = ["R", "NC-17"]
-#
-#     with sqlite3.connect("netflix.db") as connection:
-#         cursor = connection.cursor()
-#         sqlite_query = f"""
-#                         SELECT title, rating, description
-#                         FROM netflix
-#                         WHERE rating IN {rating_list}
-#                         """
-#     print(sqlite_query)
-#     cursor.execute(sqlite_query)
-#     sql_result = cursor.fetchall()
-#     result = []
-#     for row in sql_result:
-#         result.append({"title": f"{row[0]}", "rating": f"{row[1]}", "description": f"{row[2]}"})
-#     json_result = json.dumps(result)
-#     return json_result
-#
-#
-# search_by_range_listed_in_groups('children')
+
